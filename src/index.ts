@@ -7,6 +7,8 @@ import conversationsRoutes from "./routes/conversationsRoutes";
 import messagesRoutes from "./routes/messagesRoutes";
 import { saveMessage } from "./controllers/messagesController";
 import contactsRoutes from "./routes/contactsRoutes";
+import "./cron/cronJob";
+require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);

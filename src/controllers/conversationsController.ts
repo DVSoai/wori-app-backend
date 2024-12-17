@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import pool from "../models/db";
-import { log } from "console";
+import { error, log } from "console";
 
 export const fetchAllConversationsByUserId = async (
   req: Request,
@@ -126,5 +126,32 @@ export const checkOrCreateConversation = async (
   } catch (error) {
     console.error("Error checking or creating conversation:", error);
     res.status(500).json({ error: "Failed to check or create conversation" });
+  }
+};
+
+export const getDailyQuestion = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const conversationId = req.params.id;
+  console.log("Conversation ID:", conversationId);
+  const AI_BOT_ID = process.env.AI_BOT_ID;
+  try {
+    const result = await pool.query(
+      `
+      SELECT content FROM messages
+      WHERE conversation_id = $1 AND sender_id = $2
+      ORDER BY created_at DESC
+      LIMIT 1
+      `,
+      [conversationId, AI_BOT_ID]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "No daily question found" });
+    }
+    res.json({ question: result.rows[0].content });
+  } catch (error) {
+    console.error(`Error fetching daily question: ${error}`);
+    res.status(500).json({ error: "Failed to fetch daily question" });
   }
 };
