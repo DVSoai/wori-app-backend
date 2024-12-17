@@ -11,6 +11,15 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "worisrefreshkey";
 const ACCESS_TOKEN_EXPIRATION = "5m"; // 15 phút
 const REFRESH_TOKEN_EXPIRATION = "7d"; // 7 ngày
 
+const randomImages = [
+  "https://duhocsunny.edu.vn/wp-content/uploads/2023/02/Go-Youn-Jung-Anh-Gai-xinh-Han-Quoc-.jpg",
+  "https://duhocsunny.edu.vn/wp-content/uploads/2023/02/Anh-gai-xinh-Han-Quoc-Han-Kyung.jpg",
+  "https://i.vietgiaitri.com/2013/11/19/anh-girl-xinh-han-quoc-chan-dai-hd-dep-nhat-7696b5.jpg",
+  "https://bhd.1cdn.vn/2021/08/19/files-library-images-site-1-20210819-web-ve-dep-dam-chat-latinh-cua-hoa-hau-the-gioi-colombia-2021-32-145409.jpg",
+  "https://bhd.1cdn.vn/2021/08/19/files-library-images-site-1-20210819-web-ve-dep-dam-chat-latinh-cua-hoa-hau-the-gioi-colombia-2021-32-145411.jpg",
+  "https://bhd.1cdn.vn/2021/08/19/files-library-images-site-1-20210819-web-ve-dep-dam-chat-latinh-cua-hoa-hau-the-gioi-colombia-2021-32-145413.jpg",
+];
+
 const generateTokens = (user: any) => {
   const payload = {
     id: user.id,
@@ -39,10 +48,11 @@ export const register = async (req: Request, res: Response) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
+    const randomImage =
+      randomImages[Math.floor(Math.random() * randomImages.length)];
     const result = await pool.query(
-      "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *",
-      [username, email, hashedPassword]
+      "INSERT INTO users (username, email, password, profile_image) VALUES ($1, $2, $3, $4) RETURNING *",
+      [username, email, hashedPassword, randomImage]
     );
 
     const user = result.rows[0];

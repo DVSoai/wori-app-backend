@@ -32,11 +32,19 @@ export const fetchAllConversationsByUserId = async (
 
     const result = await pool.query(
       `SELECT c.id AS conversation_id,
-                  u.username AS participant_name,
+      CASE 
+          WHEN u1.id  = $1 THEN u2.username
+          ELSE u1.username
+      END AS participant_name,
+      CASE
+          WHEN u1.id = $1 THEN u2.profile_image
+          ELSE u1.profile_image
+          END AS participant_image,
                   m.content AS last_message,
                   m.created_at AS last_message_time
            FROM conversations c
-           JOIN users u ON u.id IN (c.participant_one, c.participant_two) AND u.id != $1
+           JOIN users u1 ON u1.id  = c.participant_one
+           JOIN users u2 ON u2.id  = c.participant_two
            LEFT JOIN LATERAL (
                SELECT content, created_at
                FROM messages
