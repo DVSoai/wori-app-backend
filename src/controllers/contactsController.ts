@@ -1,3 +1,4 @@
+import { json } from "body-parser";
 import { Request, Response } from "express";
 import pool from "../models/db";
 import { error } from "console";
@@ -57,5 +58,32 @@ export const addContact = async (req: Request, res: Response): Promise<any> => {
   } catch (error) {
     console.error("Error adding contact :", error);
     return res.status(500).json({ error: "Failed to add Contact" });
+  }
+};
+export const recentContacts = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  let userId = null;
+  if (req.user) {
+    userId = req.user.id;
+  }
+
+  try {
+    const result = await pool.query(
+      `
+          SELECT u.id AS contact_id, u.username, u.email, u.profile_image
+          FROM contacts c
+          JOIN users u ON u.id = c.contact_id
+          WHERE c.user_id = $1
+          ORDER BY c.created_at DESC
+          LIMIT 8
+    `,
+      [userId]
+    );
+    res.status(201).json(result.rows);
+  } catch (error) {
+    console.error("Error recent contacts:", error);
+    return res.status(500).json({ error: "Failed to recent contacts" });
   }
 };
